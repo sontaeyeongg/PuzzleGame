@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Panel;
@@ -102,6 +103,33 @@ class Puzzle implements ActionListener {
 			if (temp % size == 0) {
 				y += i;
 				x = 0;
+			}
+		}
+
+		int a = 0;
+		String stemp;
+		int d = i, b = j;
+		for (i = 0; i < size; i++) {
+			for (j = 0; j < size; j++) {
+				if (it.hasNext()) {
+					a = (int) it.next();
+				}
+				b1[i][j] = new JButton(new ImageIcon(image[a]));
+				b1[i][j].addActionListener(this);
+
+				stemp = String.valueOf(a);
+				b1[i][j].setActionCommand(stemp);
+				b1[i][j].setPreferredSize(new Dimension(d, b));
+				p.add(b1[i][j]);
+			}
+		}
+	}
+
+	void Counting() {
+		int k = 0, temp, check = 0;
+		for (i = 0; i < size; i++) {
+			for (j = 0; j < size; j++, k++) {
+				temp = Integer.parseInt(b1[i][j].getActionCommand());
 			}
 		}
 	}
