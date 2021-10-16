@@ -1,0 +1,8 @@
+sans,29
+thor,12
+sinyoung,23
+me,88
+yes,223
+jaami,57
+S89,44
+Name,9999
