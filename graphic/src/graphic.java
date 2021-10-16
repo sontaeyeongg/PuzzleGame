@@ -1,20 +1,27 @@
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.*;
+import java.awt.*;
+import javax.swing.*;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.border.LineBorder;
 
 class graphic {
 	public static void main(String[] args) {
@@ -23,6 +30,7 @@ class graphic {
 }
 
 class Puzzle implements ActionListener {
+	Time t = new Time();
 	JFrame f;
 	ImageIcon m1;
 	JLabel l1 = new JLabel(m1);
@@ -39,7 +47,7 @@ class Puzzle implements ActionListener {
 	Puzzle(String name) {
 		randPhoto();
 		f = new JFrame(name);
-		f.setSize(width + 150, height + 150);
+		f.setSize(width, height + 100);
 		name = JOptionPane.showInputDialog("원하시는 필드의 크기를 입력해주세요.");
 		size = Integer.parseInt(name);
 		flow();
@@ -75,10 +83,12 @@ class Puzzle implements ActionListener {
 		p.setSize(height, width);
 		p.setLayout(new GridLayout(size, size));
 		f.add(p, "West");
+		f.add(t.tl, "North");
+		t.start();
 		f.setVisible(true);
 	}
 
-	void hsSet() {
+	void hsSet() { //LinkedHashSet사용 시 중복없이 배열형성가능 값이 들어갈 때 크기가 커지는 형태이므로 size=5일시 25가 되기전까지 계속해서 랜덤값을 대입
 		while (hs.size() < (size * size)) {
 			temp = (int) (Math.random() * (size * size));
 			hs.add(temp);
@@ -130,13 +140,97 @@ class Puzzle implements ActionListener {
 		for (i = 0; i < size; i++) {
 			for (j = 0; j < size; j++, k++) {
 				temp = Integer.parseInt(b1[i][j].getActionCommand());
+				if(temp==k) {
+					check++;
+				}
 			}
 		}
+		if(check==(size*size)) {
+			end();
+		}
+	}
+	void end() {
+		JOptionPane.showMessageDialog(f,  "퍼즐을 완성하셨습니다.\nClear Time : " + t.time);
+		t.suspend();
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-
+	public void actionPerformed(ActionEvent ae) {
+		if(ch1==0) {
+			for(int i=0;i<size;i++) {
+				for(int j=0;j<size;j++) {
+					if(ae.getActionCommand()==b1[i][j].getActionCommand()) {
+						c1=i;c2=j;
+						LineBorder b2 = new LineBorder(Color.red, 5);
+						b1[i][j].setBorder(b2);						
+					}
+				}
+			}ch1=1;ch2=0;
+		}
+		
+		else if(ch2==0) {
+			int a=0,b=0;
+			for(int i=0;i<size;i++) {
+				for(int j=0;j<size;j++) {
+					if(ae.getActionCommand()==b1[i][j].getActionCommand()) {
+						a=i;b=j;
+					}
+				}
+			}
+			
+			JButton tt = new JButton();
+			b1[c1][c2].setBorder(tt.getBorder());
+			if(a+1==c1&&b==c2) {
+				tt.setActionCommand(b1[a][b].getActionCommand());
+				tt.setIcon(b1[a][b].getIcon());
+				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+				b1[a][b].setIcon(b1[c1][c2].getIcon());
+				b1[c1][c2].setActionCommand(tt.getActionCommand());
+				b1[c1][c2].setIcon(tt.getIcon());
+			}
+			else if(a-1==c1&&b==c2){
+				tt.setActionCommand(b1[a][b].getActionCommand());
+				tt.setIcon(b1[a][b].getIcon());
+				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+				b1[a][b].setIcon(b1[c1][c2].getIcon());
+				b1[c1][c2].setActionCommand(tt.getActionCommand());
+				b1[c1][c2].setIcon(tt.getIcon());
+			}
+			else if(a==c1&&b+1==c2){
+				tt.setActionCommand(b1[a][b].getActionCommand());
+				tt.setIcon(b1[a][b].getIcon());
+				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+				b1[a][b].setIcon(b1[c1][c2].getIcon());
+				b1[c1][c2].setActionCommand(tt.getActionCommand());
+				b1[c1][c2].setIcon(tt.getIcon());
+			}
+			else if(a==c1&&b-1==c2){
+				tt.setActionCommand(b1[a][b].getActionCommand());
+				tt.setIcon(b1[a][b].getIcon());
+				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+				b1[a][b].setIcon(b1[c1][c2].getIcon());
+				b1[c1][c2].setActionCommand(tt.getActionCommand());
+				b1[c1][c2].setIcon(tt.getIcon());
+			} ch1=0;
+		}
+		Counting();
+		
 	}
 
+}
+
+class Time extends Thread{
+	int time = 0;
+	JLabel tl = new JLabel("Time :" + time);
+	public void run(){
+		tl.setFont(new Font("Serif", Font.BOLD, 30));
+		tl.setForeground(Color.MAGENTA);
+		while(true){
+			try {
+				sleep(1000);
+				time++;
+				tl.setText("Time : " + time);
+			} catch (InterruptedException e) {}
+		}
+	}
 }
