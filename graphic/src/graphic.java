@@ -1,20 +1,16 @@
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.awt.image.CropImageFilter;
 import java.awt.image.FilteredImageSource;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.*;
-import java.awt.*;
-import javax.swing.*;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -38,18 +34,18 @@ class Puzzle implements ActionListener {
 	Image[] image;
 	Panel p = new Panel();
 	int i, j, size = 0, temp;
-	int c1, c2, ch1, ch2;
+	int c1, c2, ch1;
 	int[] check;
 	int height = 0, width = 0;
 	Set hs = new LinkedHashSet();
 	Iterator it;
 
 	Puzzle(String name) {
-		randPhoto();
-		f = new JFrame(name);
-		f.setSize(width, height + 100);
-		name = JOptionPane.showInputDialog("원하시는 필드의 크기를 입력해주세요.");
-		size = Integer.parseInt(name);
+		randPhoto(); // 랜덤사진 고르기 함수 호출
+		f = new JFrame(name); // 메인에서 받아온 name으로 JFrame선언
+		f.setSize(width, height + 100); // 프레임크기를 width는 사진의 크기와 동일하게 설정 , height는 timer공간만큼 더하여 설정
+		name = JOptionPane.showInputDialog("원하시는 필드의 크기를 입력해주세요."); // 입력창을 하나띄워서 N*N크기로 사진을 자르기위한 변수를 입력받는다.
+		size = Integer.parseInt(name); // 입력받은 값 size로 설정
 		flow();
 	}
 
@@ -59,10 +55,10 @@ class Puzzle implements ActionListener {
 		makeMap();
 	}
 
-	void randPhoto() {
+	void randPhoto() {// 랜덤사진
 		int rand;
 		String temp = null;
-		rand = (int) (Math.random() * 3);
+		rand = (int) (Math.random() * 3); // 0,1,2값 내에서 나온 숫자로 사진을 선택 , 아래switch참조
 		switch (rand) {
 		case 0:
 			temp = "a" + ".jpg";
@@ -74,26 +70,27 @@ class Puzzle implements ActionListener {
 			temp = "c" + ".jpg";
 			break;
 		}
-		m1 = new ImageIcon(temp);
-		height = m1.getIconHeight();
+		m1 = new ImageIcon(temp); // ImageIcon에 사진파일을 불러온다.
+		height = m1.getIconHeight(); // 사진의 height width 값을 변수에 저장
 		width = m1.getIconWidth();
 	}
 
-	void fset() {
-		p.setSize(height, width);
-		p.setLayout(new GridLayout(size, size));
-		f.add(p, "West");
-		f.add(t.tl, "North");
-		t.start();
-		f.setVisible(true);
+	void fset() { // JFrame 셋팅함수
+		p.setSize(width, height); // panel의 크기를 설정한다 (JFrame은 height+100,width)
+		p.setLayout(new GridLayout(size, size)); // GridLayOut형태로 N*N형태로 panel을 구분짓는다.
+		f.add(p, "West"); // 서쪽방향에 panel을 위치
+		f.add(t.tl, "North"); // 북쪽에 타이머의 라벨을 위치
+		t.start(); // 타이머 스타트
+		f.setVisible(true);// Frame을 표시한다.
 	}
 
-	void hsSet() { //LinkedHashSet사용 시 중복없이 배열형성가능 값이 들어갈 때 크기가 커지는 형태이므로 size=5일시 25가 되기전까지 계속해서 랜덤값을 대입
+	void hsSet() { // LinkedHashSet사용 시 중복없이 배열형성가능 값이 들어갈 때 크기가 커지는 형태이므로 size=5일시 25가 되기전까지 계속해서
+					// 랜덤값을 대입
 		while (hs.size() < (size * size)) {
 			temp = (int) (Math.random() * (size * size));
 			hs.add(temp);
 		}
-		it = hs.iterator();
+		it = hs.iterator(); // hs의 iterator를 저장
 	}
 
 	void makeMap() {
@@ -102,15 +99,17 @@ class Puzzle implements ActionListener {
 		image = new Image[size * size];
 		b1 = new JButton[size][size];
 
-		i = width / size;
-		j = height / size;
-		while (temp < size * size) {
-			Image im = m1.getImage();
-			im = f.createImage(new FilteredImageSource(im.getSource(), new CropImageFilter(x, y, i, j)));
-			image[temp] = im;
-			x += j;
+		i = width / size; // size로 나눈 width값을 i
+		j = height / size; // size로 나눈 height값을 j
+		while (temp < size * size) { // N*N크기 만큼 표현
+			Image im = m1.getImage(); // image객체 im에 m1의 이미지를 대입
+			im = f.createImage(new FilteredImageSource(im.getSource(), new CropImageFilter(x, y, i, j))); // x,y위치로부터 i
+																											// j크기만큼 사진을
+																											// 자른다
+			image[temp] = im;// 자른 사진크기를 image[0~n*n-1]범위까지 저장
+			x += j;// x에 j를 더하여 사진을 자를때마다 자르는 위치가 미니사진의 한 개 크기만큼 밀리도록 한다.
 			temp++;
-			if (temp % size == 0) {
+			if (temp % size == 0) { // 만약n번만큼 자른 경우에는 다음라인으로 내려와서 잘라야하므로 y를i만큼 더하여 다음라인으로 이동하고 x는 다시 처음위치로 이동시킨다.
 				y += i;
 				x = 0;
 			}
@@ -121,16 +120,17 @@ class Puzzle implements ActionListener {
 		int d = i, b = j;
 		for (i = 0; i < size; i++) {
 			for (j = 0; j < size; j++) {
-				if (it.hasNext()) {
-					a = (int) it.next();
+				if (it.hasNext()) { // 현재it은 hs의 iterator를 가리키는 중 , hs에 다음 값이 있을때 작동
+					a = (int) it.next(); // it.next()에 저장된 값을 a에 대입
 				}
-				b1[i][j] = new JButton(new ImageIcon(image[a]));
-				b1[i][j].addActionListener(this);
+				b1[i][j] = new JButton(new ImageIcon(image[a])); // hs에는 0~n*n-1 범위까지의 랜덤 값이 들어있었고 image배열의 랜덤위치 값을
+																	// JButton에 삽입하여 b1배열에 순차적으로 대입
+				b1[i][j].addActionListener(this); // 이벤트추가
 
 				stemp = String.valueOf(a);
-				b1[i][j].setActionCommand(stemp);
-				b1[i][j].setPreferredSize(new Dimension(d, b));
-				p.add(b1[i][j]);
+				b1[i][j].setActionCommand(stemp);// 해당숫자값을 이벤트 매개변수로 넘김
+				b1[i][j].setPreferredSize(new Dimension(d, b));// 이미지가 저장된 button크기를 width/n , height/n크기로 설정한 후
+				p.add(b1[i][j]);// gridlayout형태의 panel에 저장
 			}
 		}
 	}
@@ -139,48 +139,74 @@ class Puzzle implements ActionListener {
 		int k = 0, temp, check = 0;
 		for (i = 0; i < size; i++) {
 			for (j = 0; j < size; j++, k++) {
-				temp = Integer.parseInt(b1[i][j].getActionCommand());
-				if(temp==k) {
+				temp = Integer.parseInt(b1[i][j].getActionCommand()); // getActionCommand를 사용하여 0~n*n-1의 버튼이 순차적으로
+																		// 위치되어있는 지 확인함
+				if (temp == k) {// 같다면 check값을 ++
 					check++;
 				}
 			}
 		}
-		if(check==(size*size)) {
+		if (check == (size * size)) { // 모두 순차적으로 위치되어있다면 end()함수 호출
 			end();
 		}
 	}
+
 	void end() {
-		JOptionPane.showMessageDialog(f,  "퍼즐을 완성하셨습니다.\nClear Time : " + t.time);
-		t.suspend();
+		JOptionPane.showMessageDialog(f, "퍼즐을 완성하셨습니다.\nClear Time : " + t.time);
+		t.suspend(); // 스레드 종료
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		if(ch1==0) {
-			for(int i=0;i<size;i++) {
-				for(int j=0;j<size;j++) {
-					if(ae.getActionCommand()==b1[i][j].getActionCommand()) {
-						c1=i;c2=j;
+		if (ch1 == 0) {
+			for (int i = 0; i < size; i++) {
+				for (int j = 0; j < size; j++) {
+					if (ae.getActionCommand() == b1[i][j].getActionCommand()) { // 클릭한 버튼의 값과 b1[i][j]의 값이 동일한 것을 찾아
+																				// b1[i][j].setBorder로 처리(빨간색테두리처리)
+						c1 = i;
+						c2 = j;
 						LineBorder b2 = new LineBorder(Color.red, 5);
-						b1[i][j].setBorder(b2);						
-					}
-				}
-			}ch1=1;ch2=0;
-		}
-		
-		else if(ch2==0) {
-			int a=0,b=0;
-			for(int i=0;i<size;i++) {
-				for(int j=0;j<size;j++) {
-					if(ae.getActionCommand()==b1[i][j].getActionCommand()) {
-						a=i;b=j;
+						b1[i][j].setBorder(b2);
 					}
 				}
 			}
-			
-			JButton tt = new JButton();
-			b1[c1][c2].setBorder(tt.getBorder());
-			if(a+1==c1&&b==c2) {
+			ch1 = 1;
+		} else {
+			int a = 0, b = 0;
+			for (int i = 0; i < size; i++) {
+				for (int j = 0; j < size; j++) {
+					if (ae.getActionCommand() == b1[i][j].getActionCommand()) { // 두번째로 클릭한 버튼의 값을 찾아서 a,b에 해당 i,j번지를 대입
+						a = i;
+						b = j;
+					}
+				}
+			}
+			JButton tt = new JButton(); // 임시버튼을 만든다.
+			b1[c1][c2].setBorder(tt.getBorder()); // 임시버튼의 테두리를 선택된 버튼에 적용
+			if (a + 1 == c1 && b == c2) { // 상하좌우에 해당하는 위치만 각 if, else if문으로 검출
+				tt.setActionCommand(b1[a][b].getActionCommand()); // 임시버튼에 두번째 클릭한 버튼의 ActionCommand를 대입
+				tt.setIcon(b1[a][b].getIcon()); // tt의 Icon을 두번째 클릭 버튼의 Icon으로 설정
+
+				// 첫클릭과 둘째클릭을 바꾸는 과정 | 임시버튼에 두번째 클릭 대입 -> 두번째 클릭에 첫번째 클릭 대입 -> 첫번째 클릭에 두번째 클릭 대입
+				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+				b1[a][b].setIcon(b1[c1][c2].getIcon());
+				b1[c1][c2].setActionCommand(tt.getActionCommand());
+				b1[c1][c2].setIcon(tt.getIcon());
+			} else if (a - 1 == c1 && b == c2) {
+				tt.setActionCommand(b1[a][b].getActionCommand());
+				tt.setIcon(b1[a][b].getIcon());
+				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+				b1[a][b].setIcon(b1[c1][c2].getIcon());
+				b1[c1][c2].setActionCommand(tt.getActionCommand());
+				b1[c1][c2].setIcon(tt.getIcon());
+			} else if (a == c1 && b + 1 == c2) {
+				tt.setActionCommand(b1[a][b].getActionCommand());
+				tt.setIcon(b1[a][b].getIcon());
+				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+				b1[a][b].setIcon(b1[c1][c2].getIcon());
+				b1[c1][c2].setActionCommand(tt.getActionCommand());
+				b1[c1][c2].setIcon(tt.getIcon());
+			} else if (a == c1 && b - 1 == c2) {
 				tt.setActionCommand(b1[a][b].getActionCommand());
 				tt.setIcon(b1[a][b].getIcon());
 				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
@@ -188,49 +214,28 @@ class Puzzle implements ActionListener {
 				b1[c1][c2].setActionCommand(tt.getActionCommand());
 				b1[c1][c2].setIcon(tt.getIcon());
 			}
-			else if(a-1==c1&&b==c2){
-				tt.setActionCommand(b1[a][b].getActionCommand());
-				tt.setIcon(b1[a][b].getIcon());
-				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
-				b1[a][b].setIcon(b1[c1][c2].getIcon());
-				b1[c1][c2].setActionCommand(tt.getActionCommand());
-				b1[c1][c2].setIcon(tt.getIcon());
-			}
-			else if(a==c1&&b+1==c2){
-				tt.setActionCommand(b1[a][b].getActionCommand());
-				tt.setIcon(b1[a][b].getIcon());
-				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
-				b1[a][b].setIcon(b1[c1][c2].getIcon());
-				b1[c1][c2].setActionCommand(tt.getActionCommand());
-				b1[c1][c2].setIcon(tt.getIcon());
-			}
-			else if(a==c1&&b-1==c2){
-				tt.setActionCommand(b1[a][b].getActionCommand());
-				tt.setIcon(b1[a][b].getIcon());
-				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
-				b1[a][b].setIcon(b1[c1][c2].getIcon());
-				b1[c1][c2].setActionCommand(tt.getActionCommand());
-				b1[c1][c2].setIcon(tt.getIcon());
-			} ch1=0;
+			ch1 = 0; // 모두 처리 후 ch값을 0으로 설정 , ch값이 1이면 두번째 값을 찾는 상태
 		}
 		Counting();
-		
+
 	}
 
 }
 
-class Time extends Thread{
+class Time extends Thread { // Thread클래스를 상속
 	int time = 0;
-	JLabel tl = new JLabel("Time :" + time);
-	public void run(){
+	JLabel tl = new JLabel("Time :" + time);// 라벨을 만들어서 타이머시간을 기재할 수 있도록함
+
+	public void run() {
 		tl.setFont(new Font("Serif", Font.BOLD, 30));
 		tl.setForeground(Color.MAGENTA);
-		while(true){
+		while (true) {
 			try {
-				sleep(1000);
+				sleep(1000); // 1초마다 time값을 증가
 				time++;
-				tl.setText("Time : " + time);
-			} catch (InterruptedException e) {}
+				tl.setText("Time : " + time);// text값을 갱신시켜 그래픽상 숫자값이 변경되어 노출되게함
+			} catch (InterruptedException e) {
+			}
 		}
 	}
 }
