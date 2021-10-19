@@ -34,7 +34,7 @@ class Puzzle implements ActionListener {
 	Image[] image;
 	Panel p = new Panel();
 	int i, j, size = 0, temp;
-	int c1, c2, ch1;
+	int c1, c2;
 	int[] check;
 	int height = 0, width = 0;
 	Set hs = new LinkedHashSet();
@@ -86,8 +86,8 @@ class Puzzle implements ActionListener {
 
 	void hsSet() { // LinkedHashSet사용 시 중복없이 배열형성가능 값이 들어갈 때 크기가 커지는 형태이므로 size=5일시 25가 되기전까지 계속해서
 					// 랜덤값을 대입
-		while (hs.size() < (size * size)) {
-			temp = (int) (Math.random() * (size * size));
+		while (hs.size() < (size * size) - 1) {
+			temp = (int) (Math.random() * (size * size - 1));
 			hs.add(temp);
 		}
 		it = hs.iterator(); // hs의 iterator를 저장
@@ -122,6 +122,8 @@ class Puzzle implements ActionListener {
 			for (j = 0; j < size; j++) {
 				if (it.hasNext()) { // 현재it은 hs의 iterator를 가리키는 중 , hs에 다음 값이 있을때 작동
 					a = (int) it.next(); // it.next()에 저장된 값을 a에 대입
+				} else {
+					break;
 				}
 				b1[i][j] = new JButton(new ImageIcon(image[a])); // hs에는 0~n*n-1 범위까지의 랜덤 값이 들어있었고 image배열의 랜덤위치 값을
 																	// JButton에 삽입하여 b1배열에 순차적으로 대입
@@ -133,6 +135,17 @@ class Puzzle implements ActionListener {
 				p.add(b1[i][j]);// gridlayout형태의 panel에 저장
 			}
 		}
+		b1[size - 1][size - 1] = new JButton();
+		b1[size - 1][size - 1].addActionListener(this); // 이벤트추가
+		stemp = String.valueOf(size * size - 1);
+		b1[size - 1][size - 1].setActionCommand(stemp);// 해당숫자값을 이벤트 매개변수로 넘김
+		b1[size - 1][size - 1].setPreferredSize(new Dimension(d, b));// 이미지가 저장된 button크기를 width/n , height/n크기로 설정한 후
+		p.add(b1[size - 1][size - 1]);// gridlayout형태의 panel에 저장
+
+		c1 = size - 1;
+		c2 = size - 1;
+		LineBorder b2 = new LineBorder(Color.red, 5);
+		b1[c1][c2].setBorder(b2);
 	}
 
 	void Counting() {
@@ -158,64 +171,36 @@ class Puzzle implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent ae) {
-		if (ch1 == 0) {
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
-					if (ae.getActionCommand() == b1[i][j].getActionCommand()) { // 클릭한 버튼의 값과 b1[i][j]의 값이 동일한 것을 찾아
-																				// b1[i][j].setBorder로 처리(빨간색테두리처리)
-						c1 = i;
-						c2 = j;
-						LineBorder b2 = new LineBorder(Color.red, 5);
-						b1[i][j].setBorder(b2);
-					}
+		int a = 0, b = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				if (ae.getActionCommand() == b1[i][j].getActionCommand()) { // 두번째로 클릭한 버튼의 값을 찾아서 a,b에 해당 i,j번지를 대입
+					a = i;
+					b = j;
 				}
 			}
-			ch1 = 1;
-		} else {
-			int a = 0, b = 0;
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
-					if (ae.getActionCommand() == b1[i][j].getActionCommand()) { // 두번째로 클릭한 버튼의 값을 찾아서 a,b에 해당 i,j번지를 대입
-						a = i;
-						b = j;
-					}
-				}
-			}
-			JButton tt = new JButton(); // 임시버튼을 만든다.
-			b1[c1][c2].setBorder(tt.getBorder()); // 임시버튼의 테두리를 선택된 버튼에 적용
-			if (a + 1 == c1 && b == c2) { // 상하좌우에 해당하는 위치만 각 if, else if문으로 검출
-				tt.setActionCommand(b1[a][b].getActionCommand()); // 임시버튼에 두번째 클릭한 버튼의 ActionCommand를 대입
-				tt.setIcon(b1[a][b].getIcon()); // tt의 Icon을 두번째 클릭 버튼의 Icon으로 설정
-
-				// 첫클릭과 둘째클릭을 바꾸는 과정 | 임시버튼에 두번째 클릭 대입 -> 두번째 클릭에 첫번째 클릭 대입 -> 첫번째 클릭에 두번째 클릭 대입
-				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
-				b1[a][b].setIcon(b1[c1][c2].getIcon());
-				b1[c1][c2].setActionCommand(tt.getActionCommand());
-				b1[c1][c2].setIcon(tt.getIcon());
-			} else if (a - 1 == c1 && b == c2) {
-				tt.setActionCommand(b1[a][b].getActionCommand());
-				tt.setIcon(b1[a][b].getIcon());
-				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
-				b1[a][b].setIcon(b1[c1][c2].getIcon());
-				b1[c1][c2].setActionCommand(tt.getActionCommand());
-				b1[c1][c2].setIcon(tt.getIcon());
-			} else if (a == c1 && b + 1 == c2) {
-				tt.setActionCommand(b1[a][b].getActionCommand());
-				tt.setIcon(b1[a][b].getIcon());
-				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
-				b1[a][b].setIcon(b1[c1][c2].getIcon());
-				b1[c1][c2].setActionCommand(tt.getActionCommand());
-				b1[c1][c2].setIcon(tt.getIcon());
-			} else if (a == c1 && b - 1 == c2) {
-				tt.setActionCommand(b1[a][b].getActionCommand());
-				tt.setIcon(b1[a][b].getIcon());
-				b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
-				b1[a][b].setIcon(b1[c1][c2].getIcon());
-				b1[c1][c2].setActionCommand(tt.getActionCommand());
-				b1[c1][c2].setIcon(tt.getIcon());
-			}
-			ch1 = 0; // 모두 처리 후 ch값을 0으로 설정 , ch값이 1이면 두번째 값을 찾는 상태
 		}
+
+		JButton tt = new JButton(); // 임시버튼을 만든다.
+		LineBorder b2 = new LineBorder(Color.red, 5);
+		b1[c1][c2].setBorder(tt.getBorder()); // 임시버튼의 테두리를 선택된 버튼에 적용
+
+		if ((a + 1 == c1 && b == c2) || (a - 1 == c1 && b == c2) || (a == c1 && b + 1 == c2)
+				|| (a == c1 && b - 1 == c2)) { // 상하좌우에 해당하는 위치만 각 if, else if문으로 검출
+
+			tt.setActionCommand(b1[a][b].getActionCommand()); // 임시버튼에 두번째 클릭한 버튼의 ActionCommand를 대입
+			tt.setIcon(b1[a][b].getIcon()); // tt의 Icon을 두번째 클릭 버튼의 Icon으로 설정
+
+			// 첫클릭과 둘째클릭을 바꾸는 과정 | 임시버튼에 두번째 클릭 대입 -> 두번째 클릭에 첫번째 클릭 대입 -> 첫번째 클릭에 두번째 클릭 대입
+			b1[a][b].setActionCommand(b1[c1][c2].getActionCommand());
+			b1[a][b].setIcon(b1[c1][c2].getIcon());
+			b1[a][b].setBorder(b2);
+			b1[c1][c2].setActionCommand(tt.getActionCommand());
+			b1[c1][c2].setIcon(tt.getIcon());
+			c1 = a;
+			c2 = b;
+		}
+
 		Counting();
 
 	}
