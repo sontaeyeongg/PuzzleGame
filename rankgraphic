@@ -1,0 +1,93 @@
+package rankgraphic;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+
+import ranking.Main;
+import ranking.Properties;
+import ranking.Reading;
+import ranking.Userdata;
+import ranking.Writing;
+
+
+public class ranking extends JFrame implements ActionListener {
+
+    private final int X_RANK = 150;
+    private final int X_NAME = 250;
+    private final int X_SCORE = 350;
+    private final int X_SCORE_R = 450;
+    private final int Y = 75;
+    private final int WIDTH_LABEL = 100;
+    private final int HEIGHT_LABEL = 50;
+
+
+    private JButton bt_AnotherGame, bt_Quit;
+    private JLabel labelRank, labelName, labelScore, labelScoreR;
+
+    private ArrayList ls = new ArrayList();
+
+    ranking() {
+        setTitle("퍼즐게임 순위표");
+        setUndecorated(true);
+        setResizable(false);
+        setLayout(null);
+        setBounds(100, 100, graphic.FRAME_WIDTH, graphic.FRAME_HEIGHT);
+
+        bt_AnotherGame = new JButton("한판더!!");
+        bt_AnotherGame.setFont(new Font(null, 0, 20));
+        bt_AnotherGame.setBounds(0, 500, 100, 100);
+        bt_AnotherGame.addActionListener(this);
+
+        bt_Quit = new JButton("게임종료");
+        bt_Quit.setFont(new Font(null, 0, 20));
+        bt_Quit.setBounds(500, 500, 100, 100);
+        bt_Quit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
+
+        printRanking();
+        add(bt_AnotherGame);
+        add(bt_Quit);
+        setVisible(true);
+    }
+
+    private void printRanking() {
+        printRankingTitle();
+    }
+
+    private void printRankingTitle() {
+        labelRank = new JLabel("순위");
+        labelRank.setBounds(X_RANK, Y, WIDTH_LABEL, HEIGHT_LABEL);
+        add(labelRank);
+
+        labelName = new JLabel("이름");
+        labelName.setBounds(X_NAME, Y, WIDTH_LABEL, HEIGHT_LABEL);
+        add(labelName);
+
+        labelScore = new JLabel("점수");
+        labelScore.setBounds(X_SCORE, Y, WIDTH_LABEL, HEIGHT_LABEL);
+        add(labelScore);
+
+    }
+
+    private void reset() {
+        this.setVisible(false);
+        this.dispose(); //해당프레임만종료
+        new Main(); //새게임
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        reset();
+    }
+}
